@@ -113,8 +113,6 @@ CString GetMappinDisplayName(Handle<IMappin>& aMappin)
         return Localization->GetOnscreen(displayName);
     }
 
-    uint32_t pathHash{};
-
     auto journalManager = GetGameSystem<JournalManager>();
 
     if (const auto& questMappin = Cast<QuestMappin>(aMappin))
@@ -155,7 +153,7 @@ CString GetMappinDisplayName(Handle<IMappin>& aMappin)
                                 game::JournalEntryState::Inactive)
                             {
                                 return "Undiscovered quest...";
-                            }                            
+                            }
                             return Localization->GetOnscreen(quest->title.unk08);
                         }
                     }
@@ -224,16 +222,19 @@ struct NeuroMappinData
 
 CString mod::NeuroResponses::CreateMappinQueryResponse()
 {
-    DynArray<Handle<IMappin>> mappins{};
+    std::vector<Handle<IMappin>> mappins{};
 
     {
         auto mappinSystem = GetGameSystem<MappinSystem>();
 
         std::unique_lock lock(shared::raw::MappinSystem::MappinLock::Ref(mappinSystem));
+        auto& mappinList = shared::raw::MappinSystem::MappinList::Ref(mappinSystem);
 
-        for (auto& i : shared::raw::MappinSystem::MappinList::Ref(mappinSystem))
+        mappins.reserve(mappinList.size);
+
+        for (auto& i : mappinList)
         {
-            mappins.PushBack(i.m_mappin);
+            mappins.push_back(i.m_mappin);
         }
     }
 
