@@ -113,7 +113,10 @@ public native class NeuroSystem extends IGameSystem {
             return false;
         }
 
-        let quickhackActions = asObject.GetQuickhackData();
+        let quickhackActions: [ref<QuickhackData>];
+        RWLock.Acquire(asObject.m_neuroQuickhackDataLock);
+        quickhackActions = asObject.m_neuroLastUpdatedQuickhackData;
+        RWLock.Release(asObject.m_neuroQuickhackDataLock);
 
         let sz = ArraySize(quickhackActions);
 
@@ -514,16 +517,6 @@ public native class NeuroSystem extends IGameSystem {
     public cb func OnTrackQuest(name: String) -> String {
         let journalManager = GameInstance.GetJournalManager(GetGameInstance());
         return journalManager.TrackQuestByName(name);
-    }
-
-    public cb func OnQueryQuickhackTargets() -> [ref<NeuroQuickhackDataDto>] {
-        let player = GetPlayer(GetGameInstance());
-
-        if !IsDefined(player) {
-            return [];
-        }
-
-        return player.GetQuickhackableTargetsForNeuro();
     }
 
     public cb func OnGetContactsList() -> String {
